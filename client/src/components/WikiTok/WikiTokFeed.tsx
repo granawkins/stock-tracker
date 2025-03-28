@@ -10,7 +10,11 @@ const WikiTokFeed: React.FC = () => {
   const [articles, setArticles] = useState<WikipediaArticle[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isScrolling, setIsScrolling] = useState(false);
   const feedRef = useRef<HTMLDivElement>(null);
+
+  // Animation duration in milliseconds
+  const scrollAnimationDuration = 300;
 
   // Fetch initial batch of articles
   const { data, isError, error } = useQuery({
@@ -40,18 +44,61 @@ const WikiTokFeed: React.FC = () => {
     }
   };
 
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isScrolling) return;
+
+      if (e.key === 'ArrowDown' && currentIndex < articles.length - 1) {
+        e.preventDefault();
+        navigateToNext();
+      } else if (e.key === 'ArrowUp' && currentIndex > 0) {
+        e.preventDefault();
+        navigateToPrevious();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentIndex, articles.length, isScrolling]);
+
+  // Navigation functions
+  const navigateToNext = () => {
+    if (isScrolling || currentIndex >= articles.length - 1) return;
+
+    setIsScrolling(true);
+    setCurrentIndex(currentIndex + 1);
+    loadMoreArticles();
+
+    setTimeout(() => {
+      setIsScrolling(false);
+    }, scrollAnimationDuration);
+  };
+
+  const navigateToPrevious = () => {
+    if (isScrolling || currentIndex <= 0) return;
+
+    setIsScrolling(true);
+    setCurrentIndex(currentIndex - 1);
+
+    setTimeout(() => {
+      setIsScrolling(false);
+    }, scrollAnimationDuration);
+  };
+
   // Handle scroll/swipe to navigate between articles
   const handleWheel = (e: React.WheelEvent) => {
     // Prevent default to avoid page scroll
     e.preventDefault();
 
+    if (isScrolling) return;
+
     if (e.deltaY > 0 && currentIndex < articles.length - 1) {
       // Scrolling down - next article
-      setCurrentIndex(currentIndex + 1);
-      loadMoreArticles();
+      navigateToNext();
     } else if (e.deltaY < 0 && currentIndex > 0) {
       // Scrolling up - previous article
-      setCurrentIndex(currentIndex - 1);
+      navigateToPrevious();
     }
   };
 
@@ -63,7 +110,7 @@ const WikiTokFeed: React.FC = () => {
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartY.current === null) return;
+    if (touchStartY.current === null || isScrolling) return;
 
     const touchEndY = e.changedTouches[0].clientY;
     const diff = touchStartY.current - touchEndY;
@@ -71,11 +118,10 @@ const WikiTokFeed: React.FC = () => {
     // Detect swipe direction and minimum distance
     if (diff > 50 && currentIndex < articles.length - 1) {
       // Swipe up - next article
-      setCurrentIndex(currentIndex + 1);
-      loadMoreArticles();
+      navigateToNext();
     } else if (diff < -50 && currentIndex > 0) {
       // Swipe down - previous article
-      setCurrentIndex(currentIndex - 1);
+      navigateToPrevious();
     }
 
     touchStartY.current = null;
@@ -97,6 +143,7 @@ const WikiTokFeed: React.FC = () => {
       onWheel={handleWheel}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
+      tabIndex={0} // Make the container focusable for keyboard events
     >
       {isLoading ? (
         <div className="wiktok-loading">
