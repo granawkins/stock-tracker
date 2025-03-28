@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import path from 'path';
+import wikipediaRoutes from './routes/wikipediaRoutes';
 
 export const app = express();
 export const PORT = process.env.PORT || 5000;
@@ -11,9 +12,12 @@ app.use(cors()); // Enable CORS for frontend communication
 app.use(express.json()); // Parse JSON bodies
 app.use(express.static(CLIENT_DIST_PATH)); // Serve static files from client/dist
 
+// Register API routes
+app.use('/api/wikipedia', wikipediaRoutes);
+
 // Basic route
 app.get('/api', (req: Request, res: Response) => {
-  res.json({ message: 'Welcome to the Mentat API!' });
+  res.json({ message: 'Welcome to the WikTok API!' });
 });
 
 // Serve React app
