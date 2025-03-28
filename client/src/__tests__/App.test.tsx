@@ -12,11 +12,9 @@ vi.mock('@tanstack/react-query', () => ({
   QueryClient: vi.fn().mockImplementation(() => ({
     defaultOptions: {},
   })),
-  QueryClientProvider: ({
-    children,
-  }: {
-    children: React.ReactNode;
-  }) => <div data-testid="query-provider">{children}</div>,
+  QueryClientProvider: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="query-provider">{children}</div>
+  ),
 }));
 
 describe('App Component', () => {
