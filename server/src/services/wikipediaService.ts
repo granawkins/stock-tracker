@@ -1,7 +1,13 @@
 import axios from 'axios';
-import { WikipediaArticle, WikipediaResponse } from '../types';
+import { WikipediaArticle, WikipediaResponse, LikeResponse } from '../types';
+import articleDb from './articleDbService';
 
 const WIKIPEDIA_ACTION_API = 'https://en.wikipedia.org/w/api.php';
+
+// Configuration constants for interesting articles
+const MIN_EXTRACT_LENGTH = 200; // Minimum character length for article extract
+const MAX_FETCH_ATTEMPTS = 10; // Maximum number of batches to fetch to prevent infinite loops
+const BATCH_MULTIPLIER = 3; // How many more articles to fetch than needed
 
 // TypeScript interfaces for Wikipedia API responses
 interface WikipediaRandomArticle {
@@ -74,7 +80,10 @@ export async function getRandomArticles(
       url: page.fullurl,
     }));
 
-    return { articles };
+    // Store articles in our database and get them back with likes counts
+    const articlesWithLikes = articleDb.storeArticles(articles);
+
+    return { articles: articlesWithLikes };
   } catch (error) {
     console.error('Error fetching Wikipedia articles:', error);
     if (axios.isAxiosError(error)) {
@@ -91,12 +100,132 @@ export async function getRandomArticles(
 }
 
 /**
- * Gets a batch of articles for the TikTok-style feed
+ * Fetches interesting Wikipedia articles - those with images and substantial content
+ * @param count Number of interesting articles to fetch
+ * @returns Promise with filtered interesting Wikipedia articles
+ */
+export async function getInterestingArticles(
+  count: number = 1
+): Promise<WikipediaResponse> {
+  try {
+    const interestingArticles: WikipediaArticle[] = [];
+    let attempts = 0;
+
+    // Continue fetching until we have enough interesting articles or reach maximum attempts
+    while (
+      interestingArticles.length < count &&
+      attempts < MAX_FETCH_ATTEMPTS
+    ) {
+      // Fetch more articles than needed to increase chances of finding interesting ones
+      const batchSize =
+        Math.max(count - interestingArticles.length, 1) * BATCH_MULTIPLIER;
+
+      const response = await getRandomArticles(batchSize);
+
+      if (response.error) {
+        return response;
+      }
+
+      // Filter for articles with thumbnails and substantial content
+      const newInterestingArticles = response.articles.filter(
+        (article) =>
+          // Must have a thumbnail
+          article.thumbnail &&
+          // Must have substantial content (not too short)
+          article.extract.length > MIN_EXTRACT_LENGTH &&
+          // Extract must not be the default "No extract available" text
+          article.extract !== 'No extract available'
+      );
+
+      // Add new interesting articles to our collection
+      interestingArticles.push(...newInterestingArticles);
+      attempts++;
+    }
+
+    // Return only the requested number of articles
+    return {
+      articles: interestingArticles.slice(0, count),
+      // Add a warning if we couldn't find enough interesting articles
+      ...(interestingArticles.length < count && {
+        error: `Could only find ${interestingArticles.length} interesting articles instead of ${count} requested`,
+      }),
+    };
+  } catch (error) {
+    console.error('Error fetching interesting articles:', error);
+    if (axios.isAxiosError(error)) {
+      return {
+        articles: [],
+        error:
+          error.message || 'Error fetching interesting articles from Wikipedia',
+      };
+    }
+    return {
+      articles: [],
+      error: 'Unknown error occurred while fetching interesting articles',
+    };
+  }
+}
+
+/**
+ * Gets a batch of interesting articles for the TikTok-style feed
  * @param batchSize Number of articles to fetch at once
- * @returns Promise with Wikipedia articles
+ * @returns Promise with interesting Wikipedia articles
  */
 export async function getArticleBatch(
   batchSize: number = 5
 ): Promise<WikipediaResponse> {
-  return getRandomArticles(batchSize);
+  return getInterestingArticles(batchSize);
+}
+
+/**
+ * Like an article
+ * @param pageId The Wikipedia page ID
+ * @returns Promise with updated like count
+ */
+export async function likeArticle(
+  pageId: number
+): Promise<LikeResponse | null> {
+  const likes = articleDb.likeArticle(pageId);
+
+  if (likes === null) {
+    return null;
+  }
+
+  return {
+    pageId,
+    likes,
+  };
+}
+
+/**
+ * Get article likes
+ * @param pageId The Wikipedia page ID
+ * @returns Promise with current like count
+ */
+export async function getArticleLikes(
+  pageId: number
+): Promise<LikeResponse | null> {
+  const likes = articleDb.getArticleLikes(pageId);
+
+  if (likes === null) {
+    return null;
+  }
+
+  return {
+    pageId,
+    likes,
+  };
+}
+
+/**
+ * Get most liked articles
+ * @param limit Maximum number of articles to return
+ * @returns Promise with most liked articles
+ */
+export async function getMostLikedArticles(
+  limit: number = 10
+): Promise<WikipediaResponse> {
+  const articles = articleDb.getMostLikedArticles(limit);
+
+  return { articles };
 }
