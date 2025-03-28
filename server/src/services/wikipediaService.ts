@@ -106,47 +106,53 @@ export async function getInterestingArticles(
   try {
     const interestingArticles: WikipediaArticle[] = [];
     let attempts = 0;
-    
+
     // Continue fetching until we have enough interesting articles or reach maximum attempts
-    while (interestingArticles.length < count && attempts < MAX_FETCH_ATTEMPTS) {
+    while (
+      interestingArticles.length < count &&
+      attempts < MAX_FETCH_ATTEMPTS
+    ) {
       // Fetch more articles than needed to increase chances of finding interesting ones
-      const batchSize = Math.max(count - interestingArticles.length, 1) * BATCH_MULTIPLIER;
-      
+      const batchSize =
+        Math.max(count - interestingArticles.length, 1) * BATCH_MULTIPLIER;
+
       const response = await getRandomArticles(batchSize);
-      
+
       if (response.error) {
         return response;
       }
-      
+
       // Filter for articles with thumbnails and substantial content
-      const newInterestingArticles = response.articles.filter(article => 
-        // Must have a thumbnail
-        article.thumbnail && 
-        // Must have substantial content (not too short)
-        article.extract.length > MIN_EXTRACT_LENGTH &&
-        // Extract must not be the default "No extract available" text
-        article.extract !== 'No extract available'
+      const newInterestingArticles = response.articles.filter(
+        (article) =>
+          // Must have a thumbnail
+          article.thumbnail &&
+          // Must have substantial content (not too short)
+          article.extract.length > MIN_EXTRACT_LENGTH &&
+          // Extract must not be the default "No extract available" text
+          article.extract !== 'No extract available'
       );
-      
+
       // Add new interesting articles to our collection
       interestingArticles.push(...newInterestingArticles);
       attempts++;
     }
-    
+
     // Return only the requested number of articles
-    return { 
+    return {
       articles: interestingArticles.slice(0, count),
       // Add a warning if we couldn't find enough interesting articles
       ...(interestingArticles.length < count && {
-        error: `Could only find ${interestingArticles.length} interesting articles instead of ${count} requested`
-      })
+        error: `Could only find ${interestingArticles.length} interesting articles instead of ${count} requested`,
+      }),
     };
   } catch (error) {
     console.error('Error fetching interesting articles:', error);
     if (axios.isAxiosError(error)) {
       return {
         articles: [],
-        error: error.message || 'Error fetching interesting articles from Wikipedia',
+        error:
+          error.message || 'Error fetching interesting articles from Wikipedia',
       };
     }
     return {
