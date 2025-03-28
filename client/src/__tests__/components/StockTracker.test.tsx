@@ -1,24 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import StockTracker from '../../components/StockTracker';
-// We need to import the axios module for mocking to work correctly
-import a from 'axios';
 
-// Create mock function for axios.get before mocking the module
+// Define mock function before any imports or mocks
 const mockGet = vi.fn();
 
-// Mock axios with our predefined mock function
-// Use the 'a' variable to suppress TypeScript's unused import warning
-vi.mock('axios', () => {
-  // Trick TypeScript into thinking we're using the import
-  // void operator tells ESLint we're intentionally ignoring the expression result
-  void a.isAxiosError;
-  return {
-    default: {
-      get: mockGet
-    }
-  };
-});
+// Mock must be before imports that use it due to hoisting
+// This is a requirement of Vitest's mocking system
+vi.mock('axios', () => ({
+  default: {
+    get: mockGet
+  }
+}));
+
+// Still need to import axios for TypeScript to be happy with the module resolution
+// This doesn't affect the mock since vi.mock is hoisted to the top
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import axios from 'axios';
 
 describe('StockTracker Component', () => {
   // Setup mock data
