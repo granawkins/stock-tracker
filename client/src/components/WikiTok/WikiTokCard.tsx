@@ -15,30 +15,32 @@ const WikiTokCard: React.FC<WikiTokCardProps> = ({ article, isActive }) => {
   };
 
   // Default background image if no thumbnail is available
-  const backgroundImage = article.thumbnail 
-    ? `url(${article.thumbnail.source})` 
+  const backgroundImage = article.thumbnail
+    ? `url(${article.thumbnail.source})`
     : 'linear-gradient(135deg, #667eea, #764ba2)';
 
   return (
     <motion.div
       className="wiktok-card"
       initial={{ opacity: 0 }}
-      animate={{ 
+      animate={{
         opacity: isActive ? 1 : 0.3,
-        scale: isActive ? 1 : 0.95
+        scale: isActive ? 1 : 0.95,
       }}
       transition={{ duration: 0.3 }}
     >
-      <div 
+      <div
         className="wiktok-card-content"
-        style={{ 
+        style={{
           backgroundImage,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
+          backgroundSize: 'contain',
+          backgroundPosition: 'center',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          backgroundRepeat: 'no-repeat',
         }}
       >
         <div className="wiktok-card-overlay">
-          <motion.div 
+          <motion.div
             className="wiktok-card-text"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -48,20 +50,17 @@ const WikiTokCard: React.FC<WikiTokCardProps> = ({ article, isActive }) => {
             <div className={`wiktok-extract ${expanded ? 'expanded' : ''}`}>
               <p>{article.extract}</p>
             </div>
-            
+
             {article.extract.length > 150 && (
-              <button 
-                className="wiktok-read-more"
-                onClick={toggleExpanded}
-              >
+              <button className="wiktok-read-more" onClick={toggleExpanded}>
                 {expanded ? 'Show less' : 'Read more'}
               </button>
             )}
-            
+
             <div className="wiktok-actions">
-              <a 
-                href={article.url} 
-                target="_blank" 
+              <a
+                href={article.url}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="wiktok-button"
               >
