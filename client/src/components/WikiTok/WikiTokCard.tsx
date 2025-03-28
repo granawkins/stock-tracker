@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { WikipediaArticle } from '../../types';
 
@@ -9,6 +9,16 @@ interface WikiTokCardProps {
 
 const WikiTokCard: React.FC<WikiTokCardProps> = ({ article, isActive }) => {
   const [expanded, setExpanded] = useState(false);
+  const [hasOverflow, setHasOverflow] = useState(false);
+  const extractRef = useRef<HTMLDivElement>(null);
+
+  // Check if the content has overflow and needs a "Read more" button
+  useEffect(() => {
+    if (extractRef.current) {
+      const el = extractRef.current;
+      setHasOverflow(el.scrollHeight > el.clientHeight);
+    }
+  }, [article.extract, isActive]);
 
   const toggleExpanded = () => {
     setExpanded(!expanded);
@@ -40,17 +50,20 @@ const WikiTokCard: React.FC<WikiTokCardProps> = ({ article, isActive }) => {
       >
         <div className="wiktok-card-overlay">
           <motion.div
-            className="wiktok-card-text"
+            className={`wiktok-card-text ${expanded ? 'expanded-container' : ''}`}
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
             <h2>{article.title}</h2>
-            <div className={`wiktok-extract ${expanded ? 'expanded' : ''}`}>
+            <div
+              ref={extractRef}
+              className={`wiktok-extract ${expanded ? 'expanded' : ''}`}
+            >
               <p>{article.extract}</p>
             </div>
 
-            {article.extract.length > 150 && (
+            {hasOverflow && (
               <button className="wiktok-read-more" onClick={toggleExpanded}>
                 {expanded ? 'Show less' : 'Read more'}
               </button>
