@@ -1,8 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import StockTracker from '../../components/StockTracker';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { AxiosStatic } from 'axios';
 // We need to import the axios module for mocking to work correctly
 import a from 'axios';
 
