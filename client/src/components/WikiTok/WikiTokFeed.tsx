@@ -44,7 +44,7 @@ const WikiTokFeed: React.FC = () => {
   const handleWheel = (e: React.WheelEvent) => {
     // Prevent default to avoid page scroll
     e.preventDefault();
-    
+
     if (e.deltaY > 0 && currentIndex < articles.length - 1) {
       // Scrolling down - next article
       setCurrentIndex(currentIndex + 1);
@@ -57,17 +57,17 @@ const WikiTokFeed: React.FC = () => {
 
   // Touch controls for mobile
   const touchStartY = useRef<number | null>(null);
-  
+
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartY.current = e.touches[0].clientY;
   };
-  
+
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (touchStartY.current === null) return;
-    
+
     const touchEndY = e.changedTouches[0].clientY;
     const diff = touchStartY.current - touchEndY;
-    
+
     // Detect swipe direction and minimum distance
     if (diff > 50 && currentIndex < articles.length - 1) {
       // Swipe up - next article
@@ -77,7 +77,7 @@ const WikiTokFeed: React.FC = () => {
       // Swipe down - previous article
       setCurrentIndex(currentIndex - 1);
     }
-    
+
     touchStartY.current = null;
   };
 
@@ -91,7 +91,7 @@ const WikiTokFeed: React.FC = () => {
   }
 
   return (
-    <div 
+    <div
       className="wiktok-feed"
       ref={feedRef}
       onWheel={handleWheel}
@@ -103,14 +103,14 @@ const WikiTokFeed: React.FC = () => {
           <h2>Loading Wikipedia articles...</h2>
         </div>
       ) : (
-        <motion.div 
+        <motion.div
           className="wiktok-container"
           initial={false}
           animate={{ y: `-${currentIndex * 100}%` }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
           {articles.map((article, index) => (
-            <WikiTokCard 
+            <WikiTokCard
               key={`${article.pageId}-${index}`}
               article={article}
               isActive={index === currentIndex}
