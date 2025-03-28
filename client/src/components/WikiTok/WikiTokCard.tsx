@@ -50,8 +50,10 @@ const WikiTokCard: React.FC<WikiTokCardProps> = ({ article, isActive }) => {
         className="wiktok-card-content"
         style={{
           backgroundImage,
-          backgroundSize: 'cover',
+          backgroundSize: 'contain',
           backgroundPosition: 'center',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          backgroundRepeat: 'no-repeat',
         }}
       >
         <div className="wiktok-card-overlay">
