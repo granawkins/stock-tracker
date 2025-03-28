@@ -1,19 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import StockTracker from '../../components/StockTracker';
+// We must import axios here even though we don't use it directly
+// This is because vi.mock needs to intercept the same module that the component imports
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import axios from 'axios';
 
 // Create mock function for axios.get before mocking the module
 const mockGet = vi.fn();
-
-// Since we're mocking axios but not using it directly in our tests,
-// we need to reference it somewhere to satisfy TypeScript
-// This function is never called, but it references axios
-function referenceAxiosForTypeScript(): void {
-  // Reference axios to make TypeScript happy
-  const instance = axios.create();
-  console.log(instance);
-}
 
 // Mock axios with our predefined mock function
 vi.mock('axios', () => ({
