@@ -8,9 +8,15 @@ export interface WikipediaArticle {
   };
   pageId: number;
   url: string;
+  likes?: number;
 }
 
 export interface WikipediaResponse {
   articles: WikipediaArticle[];
   error?: string;
+}
+
+export interface LikeResponse {
+  pageId: number;
+  likes: number;
 }

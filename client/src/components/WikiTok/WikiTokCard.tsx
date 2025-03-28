@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { WikipediaArticle } from '../../types';
+import { likeArticle } from '../../services/wikipediaService';
 
 interface WikiTokCardProps {
   article: WikipediaArticle;
@@ -9,9 +10,25 @@ interface WikiTokCardProps {
 
 const WikiTokCard: React.FC<WikiTokCardProps> = ({ article, isActive }) => {
   const [expanded, setExpanded] = useState(false);
+  const [likes, setLikes] = useState(article.likes || 0);
+  const [isLiking, setIsLiking] = useState(false);
 
   const toggleExpanded = () => {
     setExpanded(!expanded);
+  };
+
+  const handleLike = async () => {
+    if (isLiking) return; // Prevent multiple rapid clicks
+
+    setIsLiking(true);
+    try {
+      const updatedLikes = await likeArticle(article.pageId);
+      setLikes(updatedLikes);
+    } catch (error) {
+      console.error('Failed to like article:', error);
+    } finally {
+      setIsLiking(false);
+    }
   };
 
   // Default background image if no thumbnail is available
@@ -46,7 +63,21 @@ const WikiTokCard: React.FC<WikiTokCardProps> = ({ article, isActive }) => {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <h2>{article.title}</h2>
+            <div className="wiktok-header">
+              <h2>{article.title}</h2>
+              <div className="wiktok-likes">
+                <button
+                  className={`wiktok-like-button ${isLiking ? 'liking' : ''}`}
+                  onClick={handleLike}
+                  disabled={isLiking}
+                  aria-label="Like this article"
+                >
+                  ❤️
+                </button>
+                <span className="wiktok-like-count">{likes}</span>
+              </div>
+            </div>
+
             <div className={`wiktok-extract ${expanded ? 'expanded' : ''}`}>
               <p>{article.extract}</p>
             </div>

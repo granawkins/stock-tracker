@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { WikipediaArticle, WikipediaResponse } from '../types';
+import { WikipediaArticle, WikipediaResponse, LikeResponse } from '../types';
+import articleDb from './articleDbService';
 
 const WIKIPEDIA_ACTION_API = 'https://en.wikipedia.org/w/api.php';
 
@@ -74,7 +75,10 @@ export async function getRandomArticles(
       url: page.fullurl,
     }));
 
-    return { articles };
+    // Store articles in our database and get them back with likes counts
+    const articlesWithLikes = articleDb.storeArticles(articles);
+
+    return { articles: articlesWithLikes };
   } catch (error) {
     console.error('Error fetching Wikipedia articles:', error);
     if (axios.isAxiosError(error)) {
@@ -99,4 +103,57 @@ export async function getArticleBatch(
   batchSize: number = 5
 ): Promise<WikipediaResponse> {
   return getRandomArticles(batchSize);
+}
+
+/**
+ * Like an article
+ * @param pageId The Wikipedia page ID
+ * @returns Promise with updated like count
+ */
+export async function likeArticle(
+  pageId: number
+): Promise<LikeResponse | null> {
+  const likes = articleDb.likeArticle(pageId);
+
+  if (likes === null) {
+    return null;
+  }
+
+  return {
+    pageId,
+    likes,
+  };
+}
+
+/**
+ * Get article likes
+ * @param pageId The Wikipedia page ID
+ * @returns Promise with current like count
+ */
+export async function getArticleLikes(
+  pageId: number
+): Promise<LikeResponse | null> {
+  const likes = articleDb.getArticleLikes(pageId);
+
+  if (likes === null) {
+    return null;
+  }
+
+  return {
+    pageId,
+    likes,
+  };
+}
+
+/**
+ * Get most liked articles
+ * @param limit Maximum number of articles to return
+ * @returns Promise with most liked articles
+ */
+export async function getMostLikedArticles(
+  limit: number = 10
+): Promise<WikipediaResponse> {
+  const articles = articleDb.getMostLikedArticles(limit);
+
+  return { articles };
 }
