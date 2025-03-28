@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import path from 'path';
+import stockRoutes from './routes/stockRoutes';
 
 export const app = express();
 export const PORT = process.env.PORT || 5000;
@@ -10,6 +11,9 @@ export const CLIENT_DIST_PATH = path.join(__dirname, '../../client/dist');
 app.use(cors()); // Enable CORS for frontend communication
 app.use(express.json()); // Parse JSON bodies
 app.use(express.static(CLIENT_DIST_PATH)); // Serve static files from client/dist
+
+// API Routes
+app.use('/api', stockRoutes);
 
 // Basic route
 app.get('/api', (req: Request, res: Response) => {

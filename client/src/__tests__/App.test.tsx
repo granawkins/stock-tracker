@@ -2,6 +2,11 @@ import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import App from '../App';
 
+// Mock the StockTracker component to avoid ResizeObserver issues
+vi.mock('../components/StockTracker', () => ({
+  default: () => <div data-testid="stock-tracker">Stock Tracker Component</div>
+}));
+
 // Define types
 type ApiResponse = {
   message: string;
@@ -28,19 +33,15 @@ describe('App Component', () => {
 
   it('renders App component correctly', () => {
     render(<App />);
-    expect(screen.getByText('Mentat Template JS')).toBeInTheDocument();
-    expect(screen.getByText(/Frontend: React, Vite/)).toBeInTheDocument();
-    expect(screen.getByText(/Backend: Node.js, Express/)).toBeInTheDocument();
-    expect(
-      screen.getByText(/Utilities: Typescript, ESLint, Prettier/)
-    ).toBeInTheDocument();
+    expect(screen.getByText('Stock Tracker')).toBeInTheDocument();
+    expect(screen.getByTestId('stock-tracker')).toBeInTheDocument();
   });
 
   it('loads and displays API message', async () => {
     render(<App />);
 
     // Should initially show loading message
-    expect(screen.getByText(/Loading message from server/)).toBeInTheDocument();
+    expect(screen.getByText(/Connecting to server/i)).toBeInTheDocument();
 
     // Wait for the fetch to resolve and check if the message is displayed
     await waitFor(() => {

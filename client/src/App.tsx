@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import mentatLogo from '/mentat.png';
 import Background from './components/Background';
+import StockTracker from './components/StockTracker';
 
 function App() {
   const [message, setMessage] = useState<string | null>(null);
@@ -41,36 +42,34 @@ function App() {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        height: '100vh',
+        minHeight: '100vh',
         width: '100vw',
         backgroundColor: '#f0f0f0',
-        gap: '1rem',
+        padding: '20px',
       }}
     >
       <Background />
       <div>
         <a href="https://mentat.ai" target="_blank">
-          <img src={mentatLogo} className="logo" alt="Mentat logo" />
+          <img src={mentatLogo} className="logo" alt="Mentat logo" width="100" />
         </a>
       </div>
-      <h1>Mentat Template JS</h1>
-      <ul>
-        <li>Frontend: React, Vite, Vitest</li>
-        <li>Backend: Node.js, Express, Jest</li>
-        <li>Utilities: Typescript, ESLint, Prettier</li>
-      </ul>
-      <p>
-        <b>Message from server:</b>{' '}
-        {loading
-          ? 'Loading message from server...'
-          : error
-            ? `Error: ${error}`
-            : message
-              ? message
-              : 'No message from server'}
-      </p>
-
-      <p>Create a new GitHub issue at tag '@MentatBot' to get started.</p>
+      <h1>Stock Tracker</h1>
+      
+      <StockTracker />
+      
+      <div style={{ marginTop: '30px', fontSize: '14px', color: '#666' }}>
+        <p>
+          <b>API Status:</b>{' '}
+          {loading
+            ? 'Connecting to server...'
+            : error
+              ? `Error: ${error}`
+              : message
+                ? message
+                : 'No connection to server'}
+        </p>
+      </div>
     </div>
   );
 }
