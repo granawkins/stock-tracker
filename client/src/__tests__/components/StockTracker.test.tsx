@@ -3,9 +3,15 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import StockTracker from '../../components/StockTracker';
 import axios from 'axios';
 
-// Mock axios
-vi.mock('axios');
-const mockedAxios = vi.mocked(axios);
+// Mock axios with specific implementation for get method
+vi.mock('axios', () => ({
+  default: {
+    get: vi.fn()
+  }
+}));
+
+// Get a reference to the mocked axios with correct typing
+const mockedAxios = axios as { get: ReturnType<typeof vi.fn> };
 
 describe('StockTracker Component', () => {
   // Setup mock data
