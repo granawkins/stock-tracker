@@ -13,7 +13,8 @@ const mockGet = vi.fn();
 // Use the 'a' variable to suppress TypeScript's unused import warning
 vi.mock('axios', () => {
   // Trick TypeScript into thinking we're using the import
-  a.isAxiosError; // Reference a property from axios to satisfy TypeScript
+  // void operator tells ESLint we're intentionally ignoring the expression result
+  void a.isAxiosError;
   return {
     default: {
       get: mockGet
