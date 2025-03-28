@@ -33,9 +33,8 @@ const WikiTokCard: React.FC<WikiTokCardProps> = ({ article, isActive }) => {
         className="wiktok-card-content"
         style={{
           backgroundImage,
-          backgroundSize: 'contain',
+          backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
           backgroundRepeat: 'no-repeat',
         }}
       >
