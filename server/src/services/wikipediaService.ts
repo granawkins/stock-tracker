@@ -1,8 +1,39 @@
 import axios from 'axios';
 import { WikipediaArticle, WikipediaResponse } from '../types';
 
-const WIKIPEDIA_API_URL = 'https://en.wikipedia.org/api/rest_v1';
 const WIKIPEDIA_ACTION_API = 'https://en.wikipedia.org/w/api.php';
+
+// TypeScript interfaces for Wikipedia API responses
+interface WikipediaRandomArticle {
+  id: number;
+  title: string;
+}
+
+interface WikipediaThumbnail {
+  source: string;
+  width: number;
+  height: number;
+}
+
+interface WikipediaPageDetails {
+  pageid: number;
+  title: string;
+  extract?: string;
+  thumbnail?: WikipediaThumbnail;
+  fullurl: string;
+}
+
+interface WikipediaRandomResponse {
+  query: {
+    random: WikipediaRandomArticle[];
+  };
+}
+
+interface WikipediaDetailsResponse {
+  query: {
+    pages: Record<string, WikipediaPageDetails>;
+  };
+}
 
 /**
  * Fetches random articles from Wikipedia
@@ -12,22 +43,22 @@ const WIKIPEDIA_ACTION_API = 'https://en.wikipedia.org/w/api.php';
 export async function getRandomArticles(count: number = 1): Promise<WikipediaResponse> {
   try {
     // Get random article titles
-    const randomResponse = await axios.get(
+    const randomResponse = await axios.get<WikipediaRandomResponse>(
       `${WIKIPEDIA_ACTION_API}?action=query&list=random&rnnamespace=0&rnlimit=${count}&format=json&origin=*`
     );
     
     const randomArticles = randomResponse.data.query.random;
-    const pageIds = randomArticles.map((article: any) => article.id).join('|');
+    const pageIds = randomArticles.map((article) => article.id).join('|');
     
     // Get details for those articles
-    const detailsResponse = await axios.get(
+    const detailsResponse = await axios.get<WikipediaDetailsResponse>(
       `${WIKIPEDIA_ACTION_API}?action=query&prop=extracts|pageimages|info&exintro=1&explaintext=1&inprop=url&pithumbsize=800&pageids=${pageIds}&format=json&origin=*`
     );
     
     const pages = detailsResponse.data.query.pages;
     
     // Transform the response into our expected format
-    const articles: WikipediaArticle[] = Object.values(pages).map((page: any) => ({
+    const articles: WikipediaArticle[] = Object.values(pages).map((page) => ({
       title: page.title,
       extract: page.extract || 'No extract available',
       thumbnail: page.thumbnail ? {

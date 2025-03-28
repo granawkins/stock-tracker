@@ -1,7 +1,6 @@
-import { describe, it, expect, vi, Mock } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import App from '../App';
-import { WikipediaArticle } from '../types';
 
 // Mock the WikiTokFeed component since we're testing App in isolation
 vi.mock('../components/WikiTok/WikiTokFeed', () => ({
