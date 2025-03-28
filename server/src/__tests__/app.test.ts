@@ -1,7 +1,6 @@
 import request from 'supertest';
 import { app } from '../app';
 import fs from 'fs';
-import path from 'path';
 import { CLIENT_DIST_PATH } from '../app';
 
 describe('API Endpoints', () => {

@@ -8,6 +8,27 @@ interface StockData {
   value: number;
 }
 
+// Interface for Alpha Vantage daily time series data point
+interface AlphaVantageDataPoint {
+  '1. open': string;
+  '2. high': string;
+  '3. low': string;
+  '4. close': string;
+  '5. volume': string;
+}
+
+// Interface for Alpha Vantage API response structure
+interface AlphaVantageResponse {
+  'Meta Data': {
+    '1. Information': string;
+    '2. Symbol': string;
+    '3. Last Refreshed': string;
+    '4. Output Size': string;
+    '5. Time Zone': string;
+  };
+  'Time Series (Daily)': Record<string, AlphaVantageDataPoint>;
+}
+
 const StockTracker = () => {
   const [ticker, setTicker] = useState<string>('');
   const [searchInput, setSearchInput] = useState<string>('');
@@ -24,7 +45,7 @@ const StockTracker = () => {
       setError(null);
       
       try {
-        const response = await axios.get(`/api/stock/${ticker}`);
+        const response = await axios.get<AlphaVantageResponse>(`/api/stock/${ticker}`);
         const timeSeriesData = response.data['Time Series (Daily)'];
         
         if (!timeSeriesData) {
@@ -33,7 +54,7 @@ const StockTracker = () => {
         
         // Format the data for the chart
         const formattedData: StockData[] = Object.entries(timeSeriesData)
-          .map(([date, values]: [string, any]) => ({
+          .map(([date, values]: [string, AlphaVantageDataPoint]) => ({
             date,
             value: parseFloat(values['4. close']),
           }))
