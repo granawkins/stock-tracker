@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import WikiTokFeed from './components/WikiTok/WikiTokFeed';
+import TopBar from './components/TopBar/TopBar';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -15,6 +16,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="app">
+        <TopBar />
         <WikiTokFeed />
       </div>
     </QueryClientProvider>
