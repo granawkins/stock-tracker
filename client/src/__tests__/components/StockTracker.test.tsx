@@ -3,15 +3,15 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import StockTracker from '../../components/StockTracker';
 import axios from 'axios';
 
-// Mock axios with specific implementation for get method
+// Create mock function for axios.get before mocking the module
+const mockGet = vi.fn();
+
+// Mock axios with our predefined mock function
 vi.mock('axios', () => ({
   default: {
-    get: vi.fn()
+    get: mockGet
   }
 }));
-
-// Get a reference to the mocked axios with correct typing
-const mockedAxios = axios as { get: ReturnType<typeof vi.fn> };
 
 describe('StockTracker Component', () => {
   // Setup mock data
@@ -44,7 +44,7 @@ describe('StockTracker Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Default mock implementation
-    mockedAxios.get.mockResolvedValue({ data: mockStockData });
+    mockGet.mockResolvedValue({ data: mockStockData });
   });
 
   it('renders the search form correctly', () => {
@@ -63,7 +63,7 @@ describe('StockTracker Component', () => {
     
     // Check that axios was called with the right URL
     await waitFor(() => {
-      expect(mockedAxios.get).toHaveBeenCalledWith('/api/stock/AAPL');
+      expect(mockGet).toHaveBeenCalledWith('/api/stock/AAPL');
     });
     
     // Check that stock info is displayed
@@ -74,7 +74,7 @@ describe('StockTracker Component', () => {
 
   it('handles API errors', async () => {
     // Mock a failure
-    mockedAxios.get.mockRejectedValue(new Error('API Error'));
+    mockGet.mockRejectedValue(new Error('API Error'));
     
     render(<StockTracker />);
     
