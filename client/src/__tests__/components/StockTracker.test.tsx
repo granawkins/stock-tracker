@@ -6,8 +6,9 @@ import axios from 'axios';
 // Create mock function for axios.get before mocking the module
 const mockGet = vi.fn();
 
-// Ensure axios is "used" to satisfy TypeScript
+// Ensure axios is "used" to satisfy TypeScript/ESLint
 // This doesn't affect the actual test but prevents unused import errors
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _unused = { axios };
 
 // Mock axios with our predefined mock function
