@@ -1,66 +1,30 @@
-import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, Mock } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import App from '../App';
+import { WikipediaArticle } from '../types';
 
-// Define types
-type ApiResponse = {
-  message: string;
-};
+// Mock the WikiTokFeed component since we're testing App in isolation
+vi.mock('../components/WikiTok/WikiTokFeed', () => ({
+  default: () => <div data-testid="wiktok-feed">WikiTok Feed Mock</div>,
+}));
 
-// Mock the fetch API
-globalThis.fetch = vi.fn() as unknown as typeof fetch;
-
-function mockFetchResponse(data: ApiResponse) {
-  return {
-    json: vi.fn().mockResolvedValue(data),
-    ok: true,
-  };
-}
+// Mock the React Query library
+vi.mock('@tanstack/react-query', () => ({
+  QueryClient: vi.fn().mockImplementation(() => ({
+    defaultOptions: {},
+  })),
+  QueryClientProvider: ({
+    children,
+  }: {
+    children: React.ReactNode;
+  }) => <div data-testid="query-provider">{children}</div>,
+}));
 
 describe('App Component', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    // Default mock implementation
-    (globalThis.fetch as unknown as Mock).mockResolvedValue(
-      mockFetchResponse({ message: 'Test Message from API' })
-    );
-  });
-
-  it('renders App component correctly', () => {
+  it('renders the WikiTok app correctly', () => {
     render(<App />);
-    expect(screen.getByText('Mentat Template JS')).toBeInTheDocument();
-    expect(screen.getByText(/Frontend: React, Vite/)).toBeInTheDocument();
-    expect(screen.getByText(/Backend: Node.js, Express/)).toBeInTheDocument();
-    expect(
-      screen.getByText(/Utilities: Typescript, ESLint, Prettier/)
-    ).toBeInTheDocument();
-  });
-
-  it('loads and displays API message', async () => {
-    render(<App />);
-
-    // Should initially show loading message
-    expect(screen.getByText(/Loading message from server/)).toBeInTheDocument();
-
-    // Wait for the fetch to resolve and check if the message is displayed
-    await waitFor(() => {
-      expect(screen.getByText('Test Message from API')).toBeInTheDocument();
-    });
-
-    expect(globalThis.fetch).toHaveBeenCalledWith('/api');
-  });
-
-  it('handles API error', async () => {
-    // Mock a failed API call
-    (globalThis.fetch as unknown as Mock).mockRejectedValue(
-      new Error('API Error')
-    );
-
-    render(<App />);
-
-    // Wait for the error message to appear
-    await waitFor(() => {
-      expect(screen.getByText(/Error: API Error/)).toBeInTheDocument();
-    });
+    expect(screen.getByTestId('query-provider')).toBeInTheDocument();
+    expect(screen.getByTestId('wiktok-feed')).toBeInTheDocument();
+    expect(screen.getByText('WikiTok Feed Mock')).toBeInTheDocument();
   });
 });
