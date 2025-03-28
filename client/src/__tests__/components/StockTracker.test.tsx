@@ -5,6 +5,7 @@ import StockTracker from '../../components/StockTracker';
 // We need to import axios for mocking to work correctly
 // Mock needs to intercept the actual module used by the component
 // @ts-expect-error - we need to import it for mocking but don't use it directly
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 import axios from 'axios';
 
 // Create mock function for axios.get before mocking the module
